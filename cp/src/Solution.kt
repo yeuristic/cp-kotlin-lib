@@ -36,4 +36,17 @@ class Solution {
         }
         return result
     }
+
+    fun findCircleNum(isConnected: Array<IntArray>): Int {
+        val size =  isConnected.first().size
+        val dsu = Dsu(size)
+        for (i in isConnected.indices) {
+            for (j in isConnected.first().indices) {
+                if (isConnected[i][j] == 1) {
+                    dsu.union(i, j)
+                }
+            }
+        }
+        return dsu.numOfGroup
+    }
 }

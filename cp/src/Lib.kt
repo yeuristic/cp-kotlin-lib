@@ -93,6 +93,42 @@ class WGraph<E> {
     fun nodes(): Set<E> = adjacent.keys
 }
 
+class Dsu(val size: Int) {
+    val parents = IntArray(size){ i -> i }
+    val groupSize = IntArray(size) { 1 }
+    var numOfGroup = size
+
+    fun find(x: Int): Int {
+        //recursive until find root. parents[x] == x means x is root
+        if (parents[x] != x) {
+            // update all parents of the set to root, flatten
+            parents[x] = find(parents[x])
+        }
+        return parents[x]
+    }
+
+    fun union(x: Int, y: Int) {
+        val rootX =  find(x)
+        val rootY = find(y)
+
+        //already in same set
+        if (rootX == rootY) return
+
+        val minRoot: Int
+        val maxRoot: Int
+        if (groupSize[rootX] > groupSize[rootY]) {
+            maxRoot = rootX
+            minRoot = rootY
+        } else {
+            maxRoot = rootY
+            minRoot = rootX
+        }
+        parents[minRoot] = maxRoot
+        groupSize[maxRoot] += groupSize[minRoot]
+        numOfGroup--
+    }
+}
+
 fun bfsEx(graph: IntGraph, start: Int): IntArray {
     val distance = IntArray(graph.size) { Int.MAX_VALUE }
     distance[start] = 0
