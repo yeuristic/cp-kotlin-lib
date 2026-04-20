@@ -1,3 +1,13 @@
+import java.util.PriorityQueue
+import kotlin.collections.ArrayDeque
+import kotlin.collections.List
+import kotlin.collections.MutableList
+import kotlin.collections.Set
+import kotlin.collections.emptyList
+import kotlin.collections.map
+import kotlin.collections.mutableListOf
+import kotlin.collections.mutableMapOf
+
 private val br = System.`in`.bufferedReader()
 
 fun nextLine(): String {
@@ -12,12 +22,25 @@ fun readInts() = readStrings().map { it.toInt() } // list of ints
 class IntGraph(val size: Int) {
     private val adjacent: Array<MutableList<Int>> = Array(size) { mutableListOf() }
 
-    fun addEdge(u: Int, v: Int, directed: Boolean = false) {
-        adjacent[u].add(v)
-        if (!directed) adjacent[v].add(u)
+    fun addEdge(v1: Int, v2: Int, directed: Boolean = false) {
+        adjacent[v1].add(v2)
+        if (!directed) adjacent[v2].add(v1)
     }
 
     fun neighbours(n: Int): List<Int> {
+        return adjacent[n]
+    }
+}
+
+class WIntGraph(val size: Int) {
+    private val adjacent: Array<MutableList<Pair<Int, Int>>> = Array(size) { mutableListOf() }
+
+    fun addEdge(v1: Int, v2: Int, weight: Int = 1, directed: Boolean = false) {
+        adjacent[v1].add(v2 to weight)
+        if (!directed) adjacent[v2].add(v1 to weight)
+    }
+
+    fun neighbours(n: Int): List<Pair<Int, Int>> {
         return adjacent[n]
     }
 }
@@ -107,6 +130,30 @@ fun dfsEx(graph: IntGraph, start: Int): BooleanArray {
     return visited
 }
 
+fun dijkstra(graph: WIntGraph, start: Int): IntArray {
+    val distance = IntArray(graph.size) { Int.MAX_VALUE }
+    val heap = PriorityQueue<Pair<Int, Int>> { a, b -> a.second.compareTo(b.second) }
+    heap.add(start to 0)
+    while (!heap.isEmpty()) {
+        val node = heap.poll()!!
+        val currVertex = node.first
+        val currDistance = node.second
+        if (currDistance > distance[currVertex]) {
+            continue
+        }
+        distance[currVertex] = currDistance
+        for (neighbour in graph.neighbours(currVertex)) {
+            val (v, d) = neighbour
+            val newDistance = distance[currVertex] + d
+            if (distance[v] > newDistance) {
+                distance[v] = newDistance
+                heap.add(v to newDistance)
+            }
+        }
+
+    }
+    return distance
+}
 
 fun IntArray.binarySearch(left: Int, right: Int, target: Int): Int {
     var start = left
@@ -125,7 +172,9 @@ fun IntArray.binarySearch(left: Int, right: Int, target: Int): Int {
 
     return -1
 }
-
+//SYNTAX
+val maxHeap = PriorityQueue(Comparator<Int> { a, b -> b.compareTo(a) })
+val minHeap = PriorityQueue<Int>()
 val stack = ArrayDeque<Int>()
 val shiftRightOp = 2 shr 1 // 1 --> 0...010 to 0...001
 val shiftLeftOp = 3 shl 1 // 6 --> 0...011 to 0...110
