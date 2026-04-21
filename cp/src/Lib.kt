@@ -93,7 +93,7 @@ class WGraph<E> {
     fun nodes(): Set<E> = adjacent.keys
 }
 
-class Dsu(val size: Int) {
+class IntDsu(val size: Int) {
     val parents = IntArray(size){ i -> i }
     val groupSize = IntArray(size) { 1 }
     var numOfGroup = size
@@ -126,6 +126,49 @@ class Dsu(val size: Int) {
         parents[minRoot] = maxRoot
         groupSize[maxRoot] += groupSize[minRoot]
         numOfGroup--
+    }
+}
+
+class Dsu<E> {
+    val parents = mutableMapOf<E,E>()
+    val groupSize = mutableMapOf<E,Int>()
+    var numOfGroup = 0
+
+    fun addNode(n: E) {
+        parents[n] = n
+        groupSize[n] = 1
+        numOfGroup++
+    }
+
+    fun find(x: E): E {
+        //recursive until find root. parents[x] == x means x is root
+        if (parents[x] != x) {
+            // update all parents of the set to root, flatten
+            parents[x] = find(parents[x]!!)
+        }
+        return parents[x]!!
+    }
+
+    fun union(x: E, y: E): Boolean {
+        val rootX =  find(x)
+        val rootY = find(y)
+
+        //already in same set
+        if (rootX == rootY) return false
+
+        val minRoot: E
+        val maxRoot: E
+        if (groupSize[rootX]!! > groupSize[rootY]!!) {
+            maxRoot = rootX
+            minRoot = rootY
+        } else {
+            maxRoot = rootY
+            minRoot = rootX
+        }
+        parents[minRoot] = maxRoot
+        groupSize[maxRoot] = groupSize[maxRoot]!! + groupSize[minRoot]!!
+        numOfGroup--
+        return true
     }
 }
 
