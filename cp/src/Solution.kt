@@ -115,4 +115,40 @@ class Solution {
         return cost
     }
 
+    //Topological sort
+    fun findOrder(numCourses: Int, prerequisites: Array<IntArray>): IntArray {
+        val graph = IntGraph(numCourses)
+        for (prerequisite in prerequisites) {
+            val dependency = prerequisite.last()
+            val dependant = prerequisite.first()
+            graph.addEdge(dependency, dependant, true)
+        }
+        val indegreeArr = IntArray(numCourses)
+        for (i in 0 until numCourses) {
+            for (neighbour in graph.neighbours(i)) {
+                indegreeArr[neighbour] += 1
+            }
+        }
+        val queue = ArrayDeque<Int>()
+        for (i in 0 until indegreeArr.size) {
+            if (indegreeArr[i] == 0) {
+                queue.add(i)
+            }
+        }
+
+        val result = IntArray(numCourses)
+        var counter = 0
+        while (!queue.isEmpty()) {
+            val node = queue.removeFirst()
+            result[counter++] = node
+            for (neighbour in graph.neighbours(node)) {
+                indegreeArr[neighbour] -= 1
+                if (indegreeArr[neighbour] == 0) {
+                    queue.add(neighbour)
+                }
+            }
+        }
+
+        return if (counter == numCourses) result else IntArray(0)
+    }
 }

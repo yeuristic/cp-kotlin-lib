@@ -234,6 +234,38 @@ fun dijkstra(graph: WIntGraph, start: Int): IntArray {
     return distance
 }
 
+//Kahn's Algorithm
+fun topologicalSort(size: Int, graph: IntGraph): IntArray {
+    val inDegreeArray = IntArray(size)
+    for (i in 0 until size) {
+        for (j in graph.neighbours(i)) {
+            inDegreeArray[j] += 1
+        }
+    }
+    val queue = ArrayDeque<Int>()
+    for (i in inDegreeArray.indices) {
+        val inDegree = inDegreeArray[i]
+        if (inDegree == 0) {
+            queue.add(i)
+        }
+    }
+    val result = IntArray(size)
+    var counter = 0
+    while (!queue.isEmpty()) {
+        val node = queue.removeFirst()
+        for (neighbours in graph.neighbours(node)) {
+            inDegreeArray[neighbours] -= 1
+            if (inDegreeArray[neighbours] == 0) {
+                queue.add(neighbours)
+            }
+        }
+        result[counter++] = node
+    }
+
+    //if DAG detected return empty array
+    return if (counter == size) result else IntArray(0)
+}
+
 fun IntArray.binarySearch(left: Int, right: Int, target: Int): Int {
     var start = left
     var end = right
