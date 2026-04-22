@@ -94,7 +94,7 @@ class WGraph<E> {
 }
 
 class IntDsu(val size: Int) {
-    val parents = IntArray(size){ i -> i }
+    val parents = IntArray(size) { i -> i }
     val groupSize = IntArray(size) { 1 }
     var numOfGroup = size
 
@@ -108,7 +108,7 @@ class IntDsu(val size: Int) {
     }
 
     fun union(x: Int, y: Int) {
-        val rootX =  find(x)
+        val rootX = find(x)
         val rootY = find(y)
 
         //already in same set
@@ -130,8 +130,8 @@ class IntDsu(val size: Int) {
 }
 
 class Dsu<E> {
-    val parents = mutableMapOf<E,E>()
-    val groupSize = mutableMapOf<E,Int>()
+    val parents = mutableMapOf<E, E>()
+    val groupSize = mutableMapOf<E, Int>()
     var numOfGroup = 0
 
     fun addNode(n: E) {
@@ -150,7 +150,7 @@ class Dsu<E> {
     }
 
     fun union(x: E, y: E): Boolean {
-        val rootX =  find(x)
+        val rootX = find(x)
         val rootY = find(y)
 
         //already in same set
@@ -283,6 +283,7 @@ fun IntArray.binarySearch(left: Int, right: Int, target: Int): Int {
 
     return -1
 }
+
 //SYNTAX
 val maxHeap = PriorityQueue(Comparator<Int> { a, b -> b.compareTo(a) })
 val minHeap = PriorityQueue<Int>()
@@ -302,4 +303,52 @@ fun test() {
     println(orOp)
     println(andOp)
     println(xorOp)
+}
+
+fun getLPS(pattern: String): IntArray {
+    if (pattern.isEmpty()) return IntArray(0)
+    val result = IntArray(pattern.length)
+    var currMax = 0
+    var i = 1
+    while (i < pattern.length) {
+        if (pattern[currMax] == pattern[i]) {
+            result[i++] = ++currMax
+        } else {
+            if (currMax != 0) {
+                //check if we can use prev lps data, and compare next char of it with current char
+                currMax = result[currMax - 1]
+            } else {
+                result[i++] = 0
+            }
+        }
+    }
+    return result
+}
+
+fun kmpSearch(text: String, pattern: String): List<Int> {
+    if (pattern.isEmpty()) return emptyList()
+    val lps = getLPS(pattern)
+    var i = 0
+    var j = 0
+
+    var result = mutableListOf<Int>()
+
+    while (i in text.indices) {
+        if (text[i] == pattern[j]) {
+            i++
+            j++
+        }
+
+        if (j == pattern.length) {
+            result.add(i-j)
+            j = lps[j-1]
+        } else if(i in text.indices && text[i] != pattern[j]) {
+            if (j != 0) {
+                j = lps[j-1]
+            } else {
+                i++
+            }
+        }
+    }
+    return result
 }
