@@ -151,4 +151,102 @@ class Solution {
 
         return if (counter == numCourses) result else IntArray(0)
     }
+
+    //Rolling Hash
+    fun findLength(nums1: IntArray, nums2: IntArray): Int {
+        val minLength = Math.min(nums1.size, nums2.size)
+
+        //binary search, search sizeK which repeated subarray exist
+        var start = 0
+        var end = minLength
+
+        var lastMax = 0
+        while (start <= end) {
+            var mid = start + (end - start) / 2
+            val repeatedIndex = searchRepeatedSubarray(nums1, nums2, mid)
+            if (repeatedIndex >= 0) {
+                lastMax = mid
+                start = mid + 1
+            } else {
+                end = mid - 1
+            }
+        }
+        return lastMax
+    }
+
+    private fun searchRepeatedSubarray(nums1: IntArray, nums2: IntArray, k: Int): Int {
+        if (k == 0) return 0
+        val base = 101L
+        val mod = Int.MAX_VALUE.toLong()
+        //compute first window
+        var aHash = 0L
+        var bHash = 0L
+        for (i in 0 until k) {
+            aHash = (aHash + nums1[i] * modPow(base, k - i - 1, mod) % mod) % mod
+            bHash = (bHash + nums2[i] * modPow(base, k - i - 1, mod) % mod) % mod
+        }
+        fun checkSame(aIdx: Int, bIdx: Int): Boolean {
+            if (aHash == bHash) {
+                for (i in 0 until k) {
+                    if (nums1[i+aIdx] != nums2[i+bIdx]) {
+                        return false
+                    }
+                }
+                return true
+            }
+            return false
+        }
+        if (checkSame(0, 0)) {
+            return 0
+        }
+        val bOriginalHash = bHash
+        val power = modPow(base, k - 1, mod)
+        for (i in 0 until (nums1.size - k + 1)) {
+            val aPrevIdx = i - 1
+            val aNextIdx = i - 1 + k
+            bHash = bOriginalHash
+            if (aPrevIdx >= 0) {
+                aHash = (aHash - nums1[aPrevIdx] * power % mod + mod) % mod
+                aHash = (aHash * base + nums1[aNextIdx]) % mod
+            }
+            for (j in 0 until (nums2.size - k + 1)) {
+                if (i == 0 && j == 0) {
+                    continue
+                }
+                val bPrevIdx = j - 1
+                val bNextIdx = j - 1 + k
+                if (bPrevIdx >= 0) {
+                    bHash = (bHash - nums2[bPrevIdx] * power % mod + mod) % mod
+                    bHash = (bHash * base + nums2[bNextIdx]) % mod
+                }
+
+                if (checkSame(i, j)) {
+                    return i
+                }
+            }
+        }
+
+        return -1
+    }
+
+
+    // a ^ b % mod
+    fun modPow(a: Long, b: Int, mod: Long): Long {
+        var result = 1L
+        var base = a % mod
+        var exp = b
+
+        while (exp > 0) {
+            //for odd exp
+            //same as exp % 2 == 1, don't know if the compiler can output same byte code, so I use this bitwise operation
+            if (exp and 1 == 1) {
+                result = (result * base) % mod
+            }
+            base = (base * base) % mod
+
+            // faster version of divide by 2
+            exp = exp shr 1
+        }
+        return result
+    }
 }
