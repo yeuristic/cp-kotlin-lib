@@ -352,3 +352,63 @@ fun kmpSearch(text: String, pattern: String): List<Int> {
     }
     return result
 }
+
+// Assume all items are positive
+fun IntArray.radixSort() {
+    var read = this
+    var write = IntArray(this.size)
+    // last digit for sign is not checked
+    for (bit in 0 until 31) {
+        var zeroCount = 0
+        for (num in read) {
+            if ((num shr bit) and 1 == 0) {
+                zeroCount++
+            }
+        }
+        var zeroPointer = 0
+        var onePointer = zeroCount
+        for (num in read) {
+            if ((num shr bit) and 1 == 0) {
+                write[zeroPointer++] = num
+            } else {
+                write[onePointer++] = num
+            }
+        }
+        val temp = read
+        read = write
+        write = temp
+    }
+    for (i in indices) {
+        this[i] = read[i]
+    }
+}
+
+// Assume all items are positive
+fun LongArray.radixSort() {
+    var read = this
+    var write = LongArray(this.size)
+    // last digit for sign is not checked
+    for (bit in 0 until 63) {
+        var zeroCount = 0
+        for (num in read) {
+            if ((num shr bit) and 1L == 0L) {
+                zeroCount++
+            }
+        }
+        var zeroPointer = 0
+        var onePointer = zeroCount
+        for (num in read) {
+            if ((num shr bit) and 1L == 0L) {
+                write[zeroPointer++] = num
+            } else {
+                write[onePointer++] = num
+            }
+        }
+        val temp = read
+        read = write
+        write = temp
+    }
+    for (i in indices) {
+        this[i] = read[i]
+    }
+}
