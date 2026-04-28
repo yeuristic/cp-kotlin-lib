@@ -340,11 +340,11 @@ fun kmpSearch(text: String, pattern: String): List<Int> {
         }
 
         if (j == pattern.length) {
-            result.add(i-j)
-            j = lps[j-1]
-        } else if(i in text.indices && text[i] != pattern[j]) {
+            result.add(i - j)
+            j = lps[j - 1]
+        } else if (i in text.indices && text[i] != pattern[j]) {
             if (j != 0) {
-                j = lps[j-1]
+                j = lps[j - 1]
             } else {
                 i++
             }
@@ -410,5 +410,50 @@ fun LongArray.radixSort() {
     }
     for (i in indices) {
         this[i] = read[i]
+    }
+}
+
+class IntSegmentTree(originalArray: IntArray, val initialValue: Int, val block: (Int, Int) -> Int) {
+    val size: Int = originalArray.size
+    val tree: IntArray = IntArray(size * 2) { initialValue }
+
+    // Example for sum and the original array = [2,5,6,1,3,1,8]
+    // tree array will be = [_,26,15,11,11,4,9] U [2,5,6,1 ,3 ,1 ,8 ]
+    //             Index  = [0,1 ,2 ,3 ,4 ,5,6] U [7,8,9,10,11,12,13]
+    init {
+        for (i in originalArray.indices) {
+            tree[size + i] = originalArray[i]
+        }
+        for (i in size - 1 downTo 1) {
+            tree[i] = block(tree[i * 2] , tree[i * 2 + 1])
+        }
+    }
+
+    fun query(start: Int, endExcl: Int): Int {
+        var lResult = initialValue
+        var rResult = initialValue
+        var l = start + size
+        var r = endExcl + size
+        while (l < r) {
+            if (l and 1 == 1) {
+                lResult = block(lResult, tree[l++])
+            }
+            if (r and 1 == 1) {
+                rResult = block(tree[--r], rResult)
+            }
+            l /= 2
+            r /= 2
+        }
+        return block(lResult, rResult)
+    }
+
+    fun update(index: Int, value: Int) {
+        var treeIndex = index + size
+        tree[treeIndex] = value
+
+        while (treeIndex > 1) {
+            treeIndex /= 2
+            tree[treeIndex] = block(tree[2 * treeIndex], tree[2 * treeIndex + 1])
+        }
     }
 }
