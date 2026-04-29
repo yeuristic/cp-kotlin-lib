@@ -249,4 +249,31 @@ class Solution {
         }
         return result
     }
+
+
+    class TreeNode(var `val`: Int) {
+        var left: TreeNode? = null
+        var right: TreeNode? = null
+    }
+
+    fun isSameTree(p: TreeNode?, q: TreeNode?): Boolean {
+        if (p == null && q == null) {
+            return true
+        } else if (p == null) {
+            return false
+        } else if (q == null) {
+            return false
+        } else {
+            if (p.`val` != q.`val`) {
+                return false
+            }
+            return isSameTree(p.left, q.left) && isSameTree(p.right, q.right)
+        }
+    }
+
+//    fun maxArea(height: IntArray): Int {
+//        val lines = height.mapIndexed { index, i -> Position(index, i) }
+//        val heapLeft = PriorityQueue<Position>()
+//        heapLeft.addAll()
+//    }
 }

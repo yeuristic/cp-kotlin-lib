@@ -457,3 +457,92 @@ class IntSegmentTree(originalArray: IntArray, val initialValue: Int, val block: 
         }
     }
 }
+
+class Heap<E>(private val data: MutableList<E>, val comparator: Comparator<E>) {
+    constructor(initialData: Collection<E>, comparator: Comparator<E>) : this(initialData.toMutableList(), comparator)
+    constructor(initialSize: Int, comparator: Comparator<E>): this(ArrayList<E>(initialSize), comparator)
+
+    init {
+        heapify()
+    }
+
+    private fun heapify() {
+        for (i in parent(data.lastIndex) downTo 0) {
+            percolateDown(i)
+        }
+    }
+
+    private fun percolateDown(index: Int) {
+        var idx = index
+        while (idx in data.indices) {
+            val leftIndex = leftChild(idx)
+            val rightIndex = rightChild(idx)
+            val currValue = data[idx]
+            val leftValue = if (leftIndex in data.indices) data[leftIndex] else null
+            val rightValue = if (rightIndex in data.indices) data[rightIndex] else null
+            if (leftValue != null && rightValue != null) {
+                val (smallestIdx, smallestChild) = if (comparator.compare(leftValue, rightValue) < 0) leftIndex to leftValue else rightIndex to rightValue
+                if (comparator.compare(currValue, smallestChild) > 0) {
+                    data[smallestIdx] = currValue
+                    data[idx] = smallestChild
+                    idx = smallestIdx
+                } else {
+                    break
+                }
+            } else if (leftValue != null) {
+                if (comparator.compare(currValue, leftValue) > 0) {
+                    data[leftIndex] = currValue
+                    data[idx] = leftValue
+                    idx = leftIndex
+                } else {
+                    break
+                }
+            } else {
+                break
+            }
+        }
+    }
+
+    private fun percolateUp(index: Int) {
+        var idx = index
+        while (idx > 0) {
+            val parentIndex = parent(idx)
+            if (comparator.compare(data[idx], data[parentIndex]) < 0) {
+                val temp = data[parentIndex]
+                data[parentIndex] = data[idx]
+                data[idx] = temp
+                idx = parentIndex
+            } else {
+                break
+            }
+        }
+    }
+
+    fun isEmpty(): Boolean {
+        return data.isEmpty()
+    }
+
+    fun add(element: E) {
+        data.add(element)
+        percolateUp(data.lastIndex)
+    }
+
+    fun peek(): E? = if (isEmpty()) null else data.first()
+
+    fun pop(): E? = if (isEmpty()) null else {
+        val lastData = data.last()
+        val firstData = data.first()
+        data[0] = lastData
+        data.removeLast()
+        percolateDown(0)
+        firstData
+    }
+
+    fun size() = data.size
+
+    private fun parent(i: Int) = (i - 1) / 2
+    private fun leftChild(i: Int) = 2 * i + 1
+    private fun rightChild(i: Int) = 2 * i + 2
+}
+
+class Position(val x: Int, val y: Int)
