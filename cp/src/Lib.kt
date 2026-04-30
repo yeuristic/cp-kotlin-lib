@@ -545,4 +545,43 @@ class Heap<E>(private val data: MutableList<E>, val comparator: Comparator<E>) {
     private fun rightChild(i: Int) = 2 * i + 2
 }
 
-class Position(val x: Int, val y: Int)
+class TrieNode {
+    val children = HashMap<Char, TrieNode>()
+    var isLeaf: Boolean = false
+}
+
+class Trie {
+    val RESULT_EXACT_AND_PREFIX = 14
+    val RESULT_EXACT = 15
+    val RESULT_PREFIX= 16
+    val RESULT_NOT_FOUND = 17
+    val root = TrieNode()
+
+    fun insert(dictionary: String) {
+        var node = root
+        for (i in dictionary.indices) {
+            val c = dictionary[i]
+            if (node.children.containsKey(c)) {
+                node = node.children[c]!!
+            } else {
+                val newNode = TrieNode()
+                node.children[c] = newNode
+                node = newNode
+            }
+        }
+        node.isLeaf = true
+    }
+
+    fun search(word: Iterable<Char>): Int {
+        var node = root
+        for (c in word) {
+            val nextNode = node.children[c] ?: return RESULT_NOT_FOUND
+            node = nextNode
+        }
+        if (node.isLeaf) {
+            return if (node.children.isEmpty()) RESULT_EXACT else RESULT_EXACT_AND_PREFIX
+        } else {
+            return RESULT_PREFIX
+        }
+    }
+}

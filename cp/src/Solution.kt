@@ -271,9 +271,65 @@ class Solution {
         }
     }
 
-//    fun maxArea(height: IntArray): Int {
-//        val lines = height.mapIndexed { index, i -> Position(index, i) }
-//        val heapLeft = PriorityQueue<Position>()
-//        heapLeft.addAll()
-//    }
+    fun maxArea(height: IntArray): Int {
+        var max = 0
+        var left = 0
+        var right = height.lastIndex
+        while (left < right) {
+            val hL = height[left]
+            val hR = height[right]
+            val vol = Math.min(hL, hR) * (right - left)
+            if (vol > max) {
+                max = vol
+            }
+            if (hL > hR) {
+                right--
+            } else {
+                left++
+            }
+        }
+        return max
+    }
+
+    fun wordBreak(s: String, wordDict: List<String>): Boolean {
+        // if true means starting in that index, no solution found no need to check further
+        val deadEndMemo = BooleanArray(s.length)
+        val trie = Trie()
+        for (word in wordDict) {
+            trie.insert(word)
+        }
+        return wordBreakHelper(s, 0, trie, deadEndMemo)
+    }
+
+    fun wordBreakHelper(s: String, startIndex: Int, trie: Trie, deadEndMemo: BooleanArray): Boolean {
+        if (startIndex >= s.length) return true
+        if (deadEndMemo[startIndex]) {
+            return false
+        }
+        val newStartIndices = ArrayDeque<Int>()
+        var node: TrieNode? = trie.root
+        var i = startIndex
+        while (node != null && i < s.length) {
+            val c = s[i]
+            val nextNode = node.children[c]
+            if (nextNode != null && nextNode.isLeaf) {
+                newStartIndices.addFirst(i+1)
+            }
+            node = nextNode
+            i++
+        }
+        if (newStartIndices.isEmpty()) {
+            deadEndMemo[startIndex] = true
+            return false
+        }
+
+        for (newIndex in newStartIndices) {
+            val nextResult = wordBreakHelper(s, newIndex, trie, deadEndMemo)
+            if (nextResult) {
+                return true
+            }
+        }
+        deadEndMemo[startIndex] = true
+        return false
+    }
 }
